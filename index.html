@@ -2309,6 +2309,7 @@ function applyLiveData(data) {
   abstractData(); // mask internal details for public view
   clearSphereCache();
   rebuildLayout();
+  _pathsDirty = true; // rebuild connections with new data
   fitAll();
 }
 
