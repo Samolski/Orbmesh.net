@@ -1023,8 +1023,8 @@ function render() {
   // t goes 0→1 between _posPrevTime and _posTickTime, then extrapolates slightly past 1
   if (_posLerpReady) {
     const interval = _posTickTime - _posPrevTime;
-    // Clamp to 1.15 — minimal extrapolation to avoid overshoot snapping
-    const t = interval > 0 ? Math.min((frameNow - _posPrevTime) / interval, 1.15) : 1;
+    // Clamp to 1.0 — no extrapolation, pure interpolation (eliminates snap-back flicker)
+    const t = interval > 0 ? Math.min((frameNow - _posPrevTime) / interval, 1.0) : 1;
     GROUPS.forEach(g => g.nodes.forEach(n => {
       const p0 = _posSnap0[n.id], p1 = _posSnap1[n.id];
       if (p0 && p1) {
