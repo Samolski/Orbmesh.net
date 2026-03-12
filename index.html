@@ -804,8 +804,8 @@ function computeOrbitalRadii() {
 // ══════════════════════════════════════════════════════
 // DATA SOURCE — live data auto-loads, hardcoded fallback
 // ══════════════════════════════════════════════════════
-// Data loading deferred until after canvas setup — see bottom of file
-rebuildLayout();
+// Data loading deferred — rebuildLayout() called by applyLiveData() after JSON loads
+// rebuildLayout(); // skip hardcoded data render to prevent flash
 
 // ══════════════════════════════════════════════════════
 // CANVAS SETUP
@@ -2318,7 +2318,7 @@ if (window.__ARCHITECTURE_DATA__) {
   fetch('architecture_data.json?t=' + Date.now())
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(data => { applyLiveData(data); })
-    .catch(() => { /* hardcoded data already loaded */ });
+    .catch(() => { abstractData(); rebuildLayout(); /* fall back to hardcoded */ });
 }
 
 // ══════════════════════════════════════════════════════
