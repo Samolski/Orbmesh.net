@@ -1014,7 +1014,7 @@ function render() {
     _posPrevTime = _posTickTime;
     _posTickTime = frameNow;
     _lastPosTick = frameNow;
-    _pathsDirty = true;  // paths need rebuild with new positions
+    // paths rebuild only once — orbital drift is too subtle to justify per-tick rebuild
     if (_posPrevTime > 0) _posLerpReady = true;
   }
 
