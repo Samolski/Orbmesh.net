@@ -1336,10 +1336,10 @@ let _connToPath = {};        // connIdx → path object (stable pulse lookup)
 let _nodeConnMap = {};       // nodeId → [{connIdx, isFrom}] (stable, rebuilt with paths)
 let _pathsDirty = true;      // flag to rebuild paths
 let _pathBuildPanX = 0, _pathBuildPanY = 0, _pathBuildZoom = 0; // viewport at last rebuild
-const PATH_OVERSCAN_BASE = 600;  // world-space px overscan at zoom <= 0.5
-// Overscan shrinks when zoomed in — less world visible, less buffer needed
+const PATH_OVERSCAN_BASE = 600;  // world-space px overscan
+// Generous overscan at all zoom levels — prevents popping during pan
 function _getOverscan() {
-  return zoom <= 0.5 ? PATH_OVERSCAN_BASE : PATH_OVERSCAN_BASE / (zoom * 2);
+  return PATH_OVERSCAN_BASE;
 }
 
 // Gravitational lensing — lines passing through core zone bend around center
@@ -1372,7 +1372,9 @@ function _rebuildPaths() {
     const from = rotPos[conn.f], to = rotPos[conn.t];
     if (!from || !to) return;
     const x1 = from.cx, y1 = from.cy, x2 = to.cx, y2 = to.cy;
-    if (!inView(x1, y1, margin) && !inView(x2, y2, margin)) return;
+    // Check endpoints AND midpoint — long curved lines can arc through viewport
+    const mx = (x1 + x2) * 0.5, my = (y1 + y2) * 0.5;
+    if (!inView(x1, y1, margin) && !inView(x2, y2, margin) && !inView(mx, my, margin)) return;
     const dx = x2 - x1, dy = y2 - y1;
     const dist = Math.sqrt(dx*dx + dy*dy);
     if (dist < 1) return;
