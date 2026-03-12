@@ -1023,8 +1023,8 @@ function render() {
   // t goes 0→1 between _posPrevTime and _posTickTime, then extrapolates slightly past 1
   if (_posLerpReady) {
     const interval = _posTickTime - _posPrevTime;
-    // Clamp to 1.5 — allow slight extrapolation for smoothness, but not too far
-    const t = interval > 0 ? Math.min((frameNow - _posPrevTime) / interval, 1.5) : 1;
+    // Clamp to 1.15 — minimal extrapolation to avoid overshoot snapping
+    const t = interval > 0 ? Math.min((frameNow - _posPrevTime) / interval, 1.15) : 1;
     GROUPS.forEach(g => g.nodes.forEach(n => {
       const p0 = _posSnap0[n.id], p1 = _posSnap1[n.id];
       if (p0 && p1) {
@@ -1392,13 +1392,15 @@ function _rebuildPaths() {
     const closestX = x1 + tProj * lx, closestY = y1 + tProj * ly;
     const closestDist = Math.sqrt((closestX - CX) * (closestX - CX) + (closestY - CY) * (closestY - CY));
 
-    // Apply lensing only if the line passes near center AND isn't terminating there
-    // (at least one endpoint must be outside the lens zone)
-    // Lines fully within the radius get 30% less deflection
-    if (closestDist < LENS_RADIUS && (fromDist > LENS_CORE || toDist > LENS_CORE)) {
+    // Apply lensing with smooth fade — no hard boundary snap
+    // Fade: full strength inside LENS_RADIUS, smooth falloff to LENS_RADIUS * 1.3
+    const LENS_FADE = LENS_RADIUS * 1.3;
+    if (closestDist < LENS_FADE && (fromDist > LENS_CORE || toDist > LENS_CORE)) {
+      const fadeFactor = closestDist < LENS_RADIUS ? 1.0
+        : 1.0 - (closestDist - LENS_RADIUS) / (LENS_FADE - LENS_RADIUS);
       const interior = (fromDist < LENS_RADIUS && toDist < LENS_RADIUS) ? 0.7 : 1.0;
-      const d1 = _lensDeflect(cp1x, cp1y, dist, interior);
-      const d2 = _lensDeflect(cp2x, cp2y, dist, interior);
+      const d1 = _lensDeflect(cp1x, cp1y, dist, interior * fadeFactor);
+      const d2 = _lensDeflect(cp2x, cp2y, dist, interior * fadeFactor);
       cp1x = d1.x; cp1y = d1.y;
       cp2x = d2.x; cp2y = d2.y;
     }
