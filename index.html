@@ -2308,7 +2308,7 @@ function applyLiveData(data) {
   abstractData(); // mask internal details for public view
   clearSphereCache();
   rebuildLayout();
-
+  fitAll();
 }
 
 // Auto-load: prefer script-tag global, fall back to fetch, then hardcoded
@@ -2318,14 +2318,13 @@ if (window.__ARCHITECTURE_DATA__) {
   fetch('architecture_data.json?t=' + Date.now())
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(data => { applyLiveData(data); })
-    .catch(() => { abstractData(); rebuildLayout(); /* fall back to hardcoded */ });
+    .catch(() => { abstractData(); rebuildLayout(); fitAll(); /* fall back to hardcoded */ });
 }
 
 // ══════════════════════════════════════════════════════
 // START
 // ══════════════════════════════════════════════════════
 requestAnimationFrame(render);
-setTimeout(fitAll, 50);
 </script>
 </body>
 </html>
